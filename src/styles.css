@@ -145,7 +145,7 @@ tr:last-child td { border-bottom: 0; }
   margin: .75rem 0;
 }
 @media (prefers-color-scheme: dark) { .exito { background: #12301f; color: #8be0a8; } }
-td.acciones { display: flex; gap: .4rem; flex-wrap: nowrap; }
+td.acciones button + button { margin-left: .4rem; }
 button.peligro-borde { color: var(--error); border-color: var(--error); }
 button.peligro { background: var(--error); color: #fff; }
 textarea {
