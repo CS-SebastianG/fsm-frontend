@@ -134,3 +134,52 @@ th { color: var(--suave); font-weight: 600; text-transform: capitalize; }
 tr:last-child td { border-bottom: 0; }
 .vacio { text-align: center; color: var(--suave); padding: 1.5rem; }
 .pie { display: flex; align-items: center; gap: 1rem; margin-top: .9rem; color: var(--suave); font-size: .9rem; }
+
+/* ---- formularios y acciones (CRUD) ---- */
+.encabezado h1 { flex: 1; margin: 0; }
+.exito {
+  background: #e7f6ec;
+  color: #14532d;
+  padding: .6rem .8rem;
+  border-radius: 8px;
+  margin: .75rem 0;
+}
+@media (prefers-color-scheme: dark) { .exito { background: #12301f; color: #8be0a8; } }
+td.acciones { display: flex; gap: .4rem; flex-wrap: nowrap; }
+button.peligro-borde { color: var(--error); border-color: var(--error); }
+button.peligro { background: var(--error); color: #fff; }
+textarea {
+  width: 100%;
+  padding: .55rem .7rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--texto);
+  font: inherit;
+}
+.fondo-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 16, 24, .55);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 10;
+}
+.modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 1.4rem;
+  display: grid;
+  gap: .8rem;
+}
+.campo { display: grid; gap: .3rem; font-size: .9rem; color: var(--suave); }
+.ayuda { color: var(--suave); font-size: .8rem; }
+.botones { display: flex; justify-content: flex-end; gap: .6rem; margin-top: .4rem; }
+.repuestos { display: grid; gap: .5rem; }
+.fila-repuesto { display: grid; grid-template-columns: 1fr 90px auto; gap: .4rem; }

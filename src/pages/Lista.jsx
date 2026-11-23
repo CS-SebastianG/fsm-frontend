@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../auth.jsx';
 import { DINERO } from '../modulos.js';
+import { rutaCon } from '../formulario.js';
+import Formulario from './Formulario.jsx';
 
 const LIMITE = 20;
 
@@ -20,7 +22,9 @@ function columnasDe(modulo, filas) {
 }
 
 export default function Lista({ modulo }) {
-  const { pedir } = useAuth();
+  const { pedir, sesion } = useAuth();
+  const [dialogo, setDialogo] = useState(null);
+  const [aviso, setAviso] = useState('');
   const [filas, setFilas] = useState([]);
   const [siguiente, setSiguiente] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -64,6 +68,21 @@ export default function Lista({ modulo }) {
     }
   }
 
+  const puede = (roles) => !roles || roles.includes(sesion.rol);
+
+  // Ejecuta la llamada del diálogo abierto y recarga la lista
+  async function ejecutar(def, fila, cuerpo) {
+    const ruta = rutaCon(def.ruta, fila || {});
+    const resultado = await pedir(def.servicio || modulo.servicio, ruta, {
+      metodo: def.metodo,
+      cuerpo: def.cuerpoFijo !== undefined ? def.cuerpoFijo : cuerpo
+    });
+    setDialogo(null);
+    setAviso(def.exito ? def.exito(resultado) : 'Listo.');
+    cargar(null);
+  }
+
+  const hayAcciones = Boolean(modulo.editar || modulo.eliminar || modulo.acciones);
   const columnas = columnasDe(modulo, filas);
   const texto = filtro.trim().toLowerCase();
   const visibles = texto
@@ -74,6 +93,9 @@ export default function Lista({ modulo }) {
     <>
       <div className="encabezado">
         <h1>{modulo.titulo}</h1>
+        {modulo.crear && puede(modulo.crear.roles) && (
+          <button onClick={() => setDialogo({ tipo: 'crear' })}>+ {modulo.crear.titulo}</button>
+        )}
         <input
           className="buscar"
           placeholder="Buscar en lo cargado…"
@@ -82,6 +104,7 @@ export default function Lista({ modulo }) {
         />
       </div>
 
+      {aviso && <p className="exito" role="status">{aviso}</p>}
       {error && <p className="error" role="alert">{error}</p>}
 
       <div className="tabla-caja">
@@ -92,6 +115,7 @@ export default function Lista({ modulo }) {
                 <th key={c}>{c.replaceAll('_', ' ')}</th>
               ))}
               {modulo.pdf && <th>PDF</th>}
+              {hayAcciones && <th>Acciones</th>}
             </tr>
           </thead>
           <tbody>
@@ -107,11 +131,36 @@ export default function Lista({ modulo }) {
                     </button>
                   </td>
                 )}
+                {hayAcciones && (
+                  <td className="acciones">
+                    {modulo.editar && puede(modulo.editar.roles) && (
+                      <button className="secundario" onClick={() => setDialogo({ tipo: 'editar', fila: f })}>
+                        Editar
+                      </button>
+                    )}
+                    {modulo.eliminar && puede(modulo.eliminar.roles) && (
+                      <button className="secundario peligro-borde" onClick={() => setDialogo({ tipo: 'eliminar', fila: f })}>
+                        Eliminar
+                      </button>
+                    )}
+                    {(modulo.acciones || [])
+                      .filter((a) => puede(a.roles) && (!a.visible || a.visible(f)))
+                      .map((a) => (
+                        <button
+                          key={a.clave}
+                          className={`secundario ${a.peligro ? 'peligro-borde' : ''}`}
+                          onClick={() => setDialogo({ tipo: 'accion', accion: a, fila: f })}
+                        >
+                          {a.texto}
+                        </button>
+                      ))}
+                  </td>
+                )}
               </tr>
             ))}
             {!cargando && !visibles.length && !error && (
               <tr>
-                <td colSpan={columnas.length + 1} className="vacio">
+                <td colSpan={columnas.length + 2} className="vacio">
                   Sin registros
                 </td>
               </tr>
@@ -125,6 +174,46 @@ export default function Lista({ modulo }) {
         {cargando && <span>Cargando…</span>}
         {siguiente && !cargando && <button onClick={() => cargar(siguiente)}>Cargar más</button>}
       </div>
+      {dialogo?.tipo === 'crear' && (
+        <Formulario
+          titulo={modulo.crear.titulo}
+          campos={modulo.crear.campos}
+          onCancelar={() => setDialogo(null)}
+          onGuardar={(cuerpo) => ejecutar({ ...modulo.crear, metodo: 'POST' }, null, cuerpo)}
+        />
+      )}
+      {dialogo?.tipo === 'editar' && (
+        <Formulario
+          titulo={modulo.editar.titulo}
+          campos={modulo.editar.campos.filter((c) => !c.soloCrear)}
+          fila={dialogo.fila}
+          onCancelar={() => setDialogo(null)}
+          onGuardar={(cuerpo) => ejecutar({ ...modulo.editar, metodo: 'PUT' }, dialogo.fila, cuerpo)}
+        />
+      )}
+      {dialogo?.tipo === 'eliminar' && (
+        <Formulario
+          titulo="Confirmar eliminación"
+          mensaje={modulo.eliminar.confirmar(dialogo.fila)}
+          textoBoton="Eliminar"
+          peligro
+          onCancelar={() => setDialogo(null)}
+          onGuardar={() => ejecutar({ ...modulo.eliminar, metodo: 'DELETE', cuerpoFijo: undefined }, dialogo.fila)}
+        />
+      )}
+      {dialogo?.tipo === 'accion' && (
+        <Formulario
+          titulo={dialogo.accion.titulo}
+          campos={dialogo.accion.campos || []}
+          fila={dialogo.fila}
+          mensaje={dialogo.accion.confirmar ? dialogo.accion.confirmar(dialogo.fila) : undefined}
+          aviso={dialogo.accion.aviso}
+          textoBoton={dialogo.accion.texto}
+          peligro={dialogo.accion.peligro}
+          onCancelar={() => setDialogo(null)}
+          onGuardar={(cuerpo) => ejecutar(dialogo.accion, dialogo.fila, cuerpo)}
+        />
+      )}
     </>
   );
 }

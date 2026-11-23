@@ -29,3 +29,15 @@ El archivo `amplify.yml` ya tiene los pasos de build (`npm ci` y `npm run build`
 
 ## Usuarios de prueba
 Tenants `tenant-1`, `tenant-2` y `tenant-3`; usuarios `admin1`, `despachador1` y `tecnico1`; contraseña `Fsm2026!`.
+
+## CRUD desde el frontend
+
+| Módulo | Operaciones |
+| --- | --- |
+| Clientes, Sitios, Técnicos, Repuestos | Crear, editar y eliminar (admin y despachador) |
+| Órdenes | Crear (elige cliente y sitio de listas cargadas desde la API) |
+| Visitas | Asignar técnico y horario, iniciar, completar (con repuestos usados) y cancelar |
+| Facturas | Lista y PDF (se generan solas al completar una visita) |
+
+Los formularios están definidos en `src/modulos.js` y se dibujan con `src/pages/Formulario.jsx`.
+Las APIs siguen validando el rol y el tenant: el frontend solo oculta los botones.
