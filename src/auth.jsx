@@ -33,10 +33,10 @@ export function AuthProvider({ children }) {
     setSesion(null);
   }, []);
 
-  const entrar = useCallback(async (tenant_id, user_id, password) => {
+  const entrar = useCallback(async (user_id, password) => {
     const datos = await llamar('usuarios', '/usuarios/login', {
       metodo: 'POST',
-      cuerpo: { tenant_id, user_id, password }
+      cuerpo: { user_id, password }
     });
     guardarSesion(datos);
     setSesion(datos);

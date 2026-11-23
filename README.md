@@ -3,7 +3,7 @@
 Base del frontend del proyecto (Grupo 5). React + Vite, pensado para publicarse en AWS Amplify.
 
 ## Qué incluye
-- **Login** con empresa (tenant), usuario y contraseña, conectado a `POST /usuarios/login`.
+- **Login** con usuario y contraseña (la empresa se deduce del usuario), conectado a `POST /usuarios/login`.
 - La sesión (token, tenant, rol) se guarda en el navegador y se cierra sola cuando vence el token (60 min).
 - **Menú base** y una lista (solo lectura, con "Cargar más" y búsqueda) para cada módulo: órdenes, visitas, clientes, sitios, técnicos, repuestos y facturas (con botón para ver el PDF).
 - Todas las llamadas pasan por `src/api.js`, que entiende los dos formatos de respuesta del backend: `{"statusCode": ..., "body": ...}` (HTTP siempre 200) y la respuesta HTTP normal.
@@ -28,7 +28,7 @@ npm run build      # genera dist/
 El archivo `amplify.yml` ya tiene los pasos de build (`npm ci` y `npm run build`, carpeta `dist`). El router usa `#` en las rutas, así que no hace falta configurar redirecciones.
 
 ## Usuarios de prueba
-Tenants `tenant-1`, `tenant-2` y `tenant-3`; usuarios `admin1`, `despachador1` y `tecnico1`; contraseña `Fsm2026!`.
+Usuarios únicos en todo el sistema: tenant-1 `admin1`, `despachador1`, `tecnico1`; tenant-2 `admin4`, `despachador2`, `tecnico2`; tenant-3 `admin7`, `despachador3`, `tecnico3`; contraseña `Fsm2026!`.
 
 ## CRUD desde el frontend
 
